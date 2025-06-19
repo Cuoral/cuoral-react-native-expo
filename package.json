@@ -4,7 +4,6 @@
   "description": "Cuoral react native expo customer interaction SDK",
   "main": "src/index.js",
  
-  "private": true,
   "exports": {
     ".": {
       "default": "./lib/module/index.js"
