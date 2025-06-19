@@ -34,10 +34,11 @@ yarn add cuoral-react-native-expo \
   expo-av \
   expo-image-picker \
   expo-notifications
-Using NPM
-bash
-Copy
-Edit
+```
+
+### Using NPM
+
+```bash
 npm install cuoral-react-native-expo \
   react \
   react-native \
@@ -47,30 +48,37 @@ npm install cuoral-react-native-expo \
   expo-av \
   expo-image-picker \
   expo-notifications
-💡 For Expo, it's recommended to install Expo modules via:
+```
 
-bash
-Copy
-Edit
-npx expo install expo-av expo-notifications expo-image-picker @react-native-async-storage/async-storage
-🧠 Peer Dependencies
+> 💡 For Expo, it's recommended to install Expo modules via:
+>
+> ```bash
+> npx expo install expo-av expo-notifications expo-image-picker @react-native-async-storage/async-storage
+> ```
+
+---
+
+## 🧠 Peer Dependencies
+
 This library relies on the following peer dependencies. Ensure they are installed in your project:
 
-Package	Version	Purpose
-react, react-native	*	Core framework
-@react-native-async-storage/async-storage	>=1.17.0	Persistent session storage
-socket.io-client	>=4.0.0	Real-time communication
-react-native-image-picker	*	Attach image files in chat
-expo-av	*	Play custom sound for new messages
-expo-notifications	*	Handle push notifications
-expo-image-picker	*	Allow media selection in Expo apps
+| Package                                   | Version    | Purpose                             |
+|-------------------------------------------|------------|-------------------------------------|
+| react, react-native                       | *          | Core framework                      |
+| @react-native-async-storage/async-storage | >=1.17.0   | Persistent session storage          |
+| socket.io-client                          | >=4.0.0    | Real-time communication             |
+| react-native-image-picker                 | *          | Attach image files in chat          |
+| expo-av                                   | *          | Play custom sound for new messages  |
+| expo-notifications                        | *          | Handle push notifications           |
+| expo-image-picker                         | *          | Allow media selection in Expo apps  |
 
-🧪 Sample Integration
+---
+
+## 🧪 Sample Integration
+
 Here’s how to integrate the widget into your app:
 
-js
-Copy
-Edit
+```jsx
 // App.js
 import React from 'react';
 import {
@@ -139,3 +147,4 @@ const styles = StyleSheet.create({
 });
 
 export default App;
+```
