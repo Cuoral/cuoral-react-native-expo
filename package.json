@@ -2,12 +2,11 @@
   "name": "cuoral-react-native-expo",
   "version": "0.1.0",
   "description": "Cuoral react native expo customer interaction SDK",
-  "main": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
+  "main": "src/index.js",
+ 
+  "private": true,
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
-      "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
     "./package.json": "./package.json"
@@ -81,15 +80,22 @@
     "react-native-builder-bob": "^0.40.8",
     "release-it": "^17.10.0",
     "typescript": "^5.8.3"
+
   },
   "peerDependencies": {
+    "@react-native-async-storage/async-storage": ">=1.17.0",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "socket.io-client": ">=4.0.0",
+    "expo-av": "*",
+    "expo-image-picker": "*",
+    "expo-notifications":"*"
   },
   "workspaces": [
-    "example"
+    "example",
+    "src"
   ],
-  "packageManager": "yarn@3.6.1",
+  "packageManager": "yarn@1.22.22",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
