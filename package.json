@@ -1,6 +1,6 @@
 {
   "name": "cuoral-react-native-expo",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Cuoral react native expo customer interaction SDK",
   "main": "src/index.js",
   "private":false,

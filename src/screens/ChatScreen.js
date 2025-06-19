@@ -139,7 +139,6 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                 Alert.alert("Error", "Could not get file data from selected image.");
             }
         } else if (result.canceled) {
-            console.log('User cancelled image picker');
         } else if (result.errorCode) {
             Alert.alert("Image Picker Error", result.errorMessage || "Failed to pick image.");
         }
@@ -148,7 +147,6 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
 
     const handleEscalateToAgent = async (messageId) => {
         if (!sessionId || !publicKey || escalatingMessageId !== null) {
-            console.warn("Cannot escalate: Session ID or Public Key missing, or already escalating.");
             return;
         }
 
@@ -215,7 +213,6 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                 setEscalatingMessageId(null);
             }, 3000);
         } catch (error) {
-            console.error('Error escalating to agent:', error);
             Alert.alert("Error", error.message || "Failed to escalate to agent. Please try again.");
             setEscalatingMessageId(null);
         }

@@ -167,7 +167,6 @@ export const CuoralProvider = ({
                 throw new Error('Failed to initiate session: No session_id returned.');
             }
         } catch (error) {
-            console.error('Error initiating session:', error);
             setSessionError(error.message || 'Failed to initiate chat session.');
             setSessionStatus('error');
             return false;
@@ -304,12 +303,10 @@ export const CuoralProvider = ({
     // Socket.IO Connection and Event Handling
     const connectSocket = useCallback((sId) => {
         if (!sId) {
-            console.warn('Cannot connect socket: Session ID is missing.');
             return;
         }
         // Disconnect and remove all previous listeners from the old socket instance if it exists
         if (socketRef.current) {
-            console.log('Disconnecting existing socket and removing listeners...');
             socketRef.current.off(); // Remove all listeners
             socketRef.current.disconnect();
             socketRef.current = null;
@@ -412,9 +409,9 @@ export const CuoralProvider = ({
             }
         });
 
-        newSocket.on("disconnect", (reason) => { console.log('WebSocket disconnected:', reason); });
-        newSocket.on("error", (error) => { console.error('WebSocket error:', error); });
-        newSocket.on("connect_error", (error) => { console.error('WebSocket connect_error:', error); });
+        newSocket.on("disconnect", (reason) => { });
+        newSocket.on("error", (error) => {});
+        newSocket.on("connect_error", (error) => { });
 
         newSocket.on("pong", (data) => {
             newSocket.emit("ping", (data) => { });
@@ -460,7 +457,6 @@ export const CuoralProvider = ({
                 }
 
                 if (!sessionSuccessfullyLoaded) {
-                    console.log('No active session found or session expired/invalid. Initiating a new one.');
                     await initiateSession(initialEmail, initialFirstName, initialLastName);
                 }
 
@@ -476,7 +472,6 @@ export const CuoralProvider = ({
                 }
 
             } catch (error) {
-                console.error('Error in setupCuoral:', error);
                 setSessionError('Failed to load or initiate session.');
                 setSessionStatus('error');
             } finally {
@@ -505,7 +500,6 @@ export const CuoralProvider = ({
 
     const sendMessageViaSocket = useCallback(async (text, fileData = null, fileName = null) => {
         if (!socketRef.current || !socketRef.current.connected || !sessionId) {
-            console.error('Socket not connected or session ID missing. Cannot send message/file.');
             setSessionError('Cannot send message/file: Chat not connected.');
             return;
         }
@@ -540,8 +534,6 @@ export const CuoralProvider = ({
                     const errorData = await response.json();
                     throw new Error(`File upload failed: ${response.status}, ${errorData.message || response.statusText}`);
                 }
-
-                console.log('File uploaded successfully, emitting send_file socket event...');
                 socketRef.current.emit("send_file", { room: sessionId });
 
             } else {
@@ -553,7 +545,6 @@ export const CuoralProvider = ({
                 socketRef.current.emit("send_message", { room: sessionId, messageData: textMessagePayload });
             }
         } catch (error) {
-            console.error("Error sending message/file:", error);
             setSessionError(error.message || "Failed to send message/file.");
         }
     }, [socketRef, sessionId, email, firstName, lastName, publicKey]);
