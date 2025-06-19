@@ -88,11 +88,9 @@ export const CuoralProvider = ({
             }
 
             token = (await Notifications.getExpoPushTokenAsync()).data;
-            console.log('Expo Push Token:', token);
             // You might want to send this token to your backend to link with the session/user
             return token;
         } catch (error) {
-            console.error('Error registering for push notifications:', error);
             return null;
         }
     }, []);
@@ -116,7 +114,6 @@ export const CuoralProvider = ({
             }
             await notificationSound.current.replayAsync();
         } catch (error) {
-            console.error('Error playing notification sound:', error);
         }
     }, [notificationSoundUrl]);
 
@@ -248,7 +245,7 @@ export const CuoralProvider = ({
                 throw new Error('Failed to retrieve session: Invalid session data or missing session ID.');
             }
         } catch (error) {
-            console.error('Error getting session:', error);
+ 
             setSessionError(error.message || 'Failed to load chat session.');
             setSessionStatus('error');
             return false;
@@ -294,7 +291,7 @@ export const CuoralProvider = ({
                 throw new Error('Failed to set profile: API returned false status.');
             }
         } catch (error) {
-            console.error('Error setting profile:', error);
+ 
             setSessionError(error.message || 'Failed to set profile information.');
             setSessionStatus('error');
             return false;
@@ -318,7 +315,7 @@ export const CuoralProvider = ({
             socketRef.current = null;
         }
 
-        console.log('Connecting socket for session:', sId);
+  
         const newSocket = io(socketUrl, {
             autoConnect: true,
             reconnection: true,
@@ -332,12 +329,11 @@ export const CuoralProvider = ({
         socketRef.current = newSocket;
 
         newSocket.on("connect", () => {
-            console.log('WebSocket connected:', newSocket.id);
+   
             newSocket.emit("join", sId);
         });
 
         newSocket.on("send_message", (message) => {
-            console.log('Incoming socket message:', message);
             if (!message || !message?.messageData) return;
 
             const isReply = message.messageData.message_type?.toLowerCase() === 'reply';
@@ -363,7 +359,6 @@ export const CuoralProvider = ({
                         (lastMessage.id === newMessageFromSocket.id ||
                             (lastMessage.text === newMessageFromSocket.text && lastMessage.sender === newMessageFromSocket.sender && lastMessage.fileUrl === newMessageFromSocket.fileUrl))
                     ) {
-                        console.log('Duplicate message detected, skipping:', newMessageFromSocket.id, newMessageFromSocket.text);
                         return prevMessages; // Return current messages without adding duplicate
                     }
                     if (newMessageFromSocket.sender === 'bot' || newMessageFromSocket.sender === 'admin') {
@@ -378,7 +373,7 @@ export const CuoralProvider = ({
         });
 
         newSocket.on("send_file", (message) => {
-            console.log('Incoming socket file message:', message);
+ 
             if (!message || !message?.messageData) return;
 
             const isExternalChannel = message.messageData.channel === 'external';
@@ -402,7 +397,7 @@ export const CuoralProvider = ({
                         (lastMessage.id === newFileMessageFromSocket.id ||
                             (lastMessage.text === newFileMessageFromSocket.text && lastMessage.sender === newFileMessageFromSocket.sender && lastMessage.fileUrl === newFileMessageFromSocket.fileUrl))
                     ) {
-                        console.log('Duplicate file message detected, skipping:', newFileMessageFromSocket.id, newFileMessageFromSocket.fileName);
+                   
                         return prevMessages; // Return current messages without adding duplicate
                     }
 
@@ -460,7 +455,7 @@ export const CuoralProvider = ({
                 const storedSessionId = await AsyncStorage.getItem(SESSION_STORAGE_KEY);
                 let sessionSuccessfullyLoaded = false;
                 if (storedSessionId) {
-                    console.log('Found stored session ID:', storedSessionId);
+                    
                     sessionSuccessfullyLoaded = await getSession(storedSessionId);
                 }
 
@@ -475,7 +470,7 @@ export const CuoralProvider = ({
                 if (sessionId && !sessionProfileExists && (initialEmail || initialFirstName || initialLastName)) {
                     const combinedName = `${initialFirstName || ''} ${initialLastName || ''}`.trim();
                     if (initialEmail && combinedName) {
-                        console.log("Attempting to set profile automatically with provided initial details.");
+       
                         await setProfile(sessionId, initialEmail, combinedName);
                     }
                 }
