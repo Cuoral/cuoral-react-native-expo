@@ -100,7 +100,7 @@ const CuoralModal = () => {
         if (sessionError) {
             return (
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>Error: {sessionError}</Text>
+                    {/* <Text style={styles.errorText}>Error: {sessionError}</Text> */}
                     <TouchableOpacity style={styles.retryButton} onPress={() => initiateSession(email, firstName, lastName)}>
                         <Text style={styles.retryButtonText}>Retry</Text>
                     </TouchableOpacity>
@@ -128,12 +128,12 @@ const CuoralModal = () => {
             <View style={[styles.header, { backgroundColor: chatThemeColor || '#2196F3' }]}>
                 {showBackButton && (
                     <TouchableOpacity style={styles.backButton} onPress={goBack}>
-                        <Text style={styles.headerIcon}>&#x2329;</Text> {/* Stylish left arrow (Angle Bracket) */}
+                        <Text style={styles.headerIcon}>&#x2329;</Text>
                     </TouchableOpacity>
                 )}
                 <Text style={styles.headerTitle}>{headerTitle}</Text>
                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                    <Text style={styles.headerIcon}>&#x2715;</Text> {/* Multiplication X (heavy) for close */}
+                    <Text style={styles.headerIcon}>&#x2715;</Text>
                 </TouchableOpacity>
             </View>
 
@@ -148,15 +148,20 @@ const CuoralModal = () => {
                     style={styles.navItem}
                     onPress={() => navigateTo('Home')}
                 >
-                    <Text style={[styles.navIcon, currentScreen === 'Home' && { color: chatThemeColor }]}>&#x1F3E0;</Text> {/* Unicode house emoji for home */}
-                    <Text style={[styles.navText, currentScreen === 'Home' && { color: chatThemeColor, fontWeight: 'bold' }]}>Home</Text>
+                    <Text style={[styles.navIcon, currentScreen === 'Home' && { color: chatThemeColor }]}>🏠</Text>
+                    <Text style={[styles.navText, currentScreen === 'Home' && { color: chatThemeColor, fontWeight: 'bold' }]}>
+                        Home
+                    </Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
                     style={styles.navItem}
                     onPress={() => navigateTo('Conversations')}
                 >
-                    <Text style={[styles.navIcon, currentScreen === 'Conversations' && { color: chatThemeColor }]}>&#x1F4AC;</Text> {/* Speech bubble emoji for message */}
-                    <Text style={[styles.navText, currentScreen === 'Conversations' && { color: chatThemeColor, fontWeight: 'bold' }]}>Message</Text>
+                    <Text style={[styles.navIcon, currentScreen === 'Conversations' && { color: chatThemeColor }]}>💬</Text>
+                    <Text style={[styles.navText, currentScreen === 'Conversations' && { color: chatThemeColor, fontWeight: 'bold' }]}>
+                        Message
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>

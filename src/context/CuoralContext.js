@@ -225,7 +225,7 @@ export const CuoralProvider = ({
                 const loadedMessages = data.messages.map(msg => ({
                     id: msg.time_created || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
                     text: msg.message,
-                    sender: msg.author_type === 'HUMAN' ? 'admin' : 'bot',
+                    sender: msg.message_type === 'REPLY' ? msg.author_type === 'HUMAN' ? 'admin' : 'bot': 'user',
                     timestamp: new Date(msg.time_created),
                     fileUrl: msg.file_url || null,
                     fileName: msg.filename || null,

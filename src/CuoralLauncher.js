@@ -33,7 +33,7 @@ const CuoralLauncher = ({
   firstName,
   lastName,
   backgroundColor = '#2196F3', // Default to Material blueAccent
-  icon = <Text style={{ color: 'white', fontSize: 24 }}>💬</Text>, // Default chat emoji icon
+  icon = <Text style={{ color: 'white', fontSize: 24 }}>hh</Text>, // Default chat emoji icon
   isVisible = true,
   position = 'bottomRight',
 }) => {

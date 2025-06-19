@@ -201,14 +201,14 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                     filename: null,
                     channel: 'external',
                     author: "Cuoral System",
-                    author_type: "BOT",
+                    author_type: "HUMAN",
                     conversation_id: sessionId,
                     organisation_id: publicKey,
                 };
                 addMessage({
                     id: Date.now().toString() + '_escalation_bot_reply',
                     text: agentResponseMessagePayload.message,
-                    sender: 'bot',
+                    sender: 'admin',
                     timestamp: new Date(),
                 });
                 sendMessageViaSocket(agentResponseMessagePayload.message);
