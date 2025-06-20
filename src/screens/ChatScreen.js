@@ -45,16 +45,21 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
     const [escalatingMessageId, setEscalatingMessageId] = useState(null);
     const flatListRef = useRef(null);
 
-    // Scroll to bottom when messages change, with a slight delay
-    useEffect(() => {
-        if (flatListRef.current && messages.length > 0) { // Ensure there are messages before attempting to scroll
-            // A small setTimeout ensures the scroll happens after the FlatList has rendered the new content
-            // and calculated its new dimensions.
-            setTimeout(() => {
-                flatListRef.current.scrollToEnd({ animated: true });
-            }, 50); // Small delay, e.g., 50ms, can be adjusted
+
+  // Scroll to bottom when messages change, with a slight delay
+  useEffect(() => {
+    // Only attempt to scroll if there are messages and the ref potentially exists
+    if (messages.length > 0) {
+      // A small setTimeout ensures the scroll happens after the FlatList has rendered the new content
+      // and calculated its new dimensions.
+      setTimeout(() => {
+        // Crucial: Check if flatListRef.current is still valid before calling scrollToEnd
+        if (flatListRef.current && flatListRef.current !== null) {
+          flatListRef.current.scrollToEnd({ animated: true });
         }
-    }, [messages]);
+      }, 50); // Small delay, e.g., 50ms, can be adjusted
+    }
+  }, [messages]);
 
     // Determine the ID of the last message from a bot
     const lastBotMessage = messages
@@ -303,7 +308,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.messagesContainer}
                 onContentSizeChange={() => {
-                    if (flatListRef.current) {
+                    if (flatListRef.current && flatListRef.current !== null) {
                         setTimeout(() => {
                             flatListRef.current.scrollToEnd({ animated: true });
                         }, 50);
