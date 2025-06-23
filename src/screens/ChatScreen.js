@@ -55,7 +55,13 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
       setTimeout(() => {
         // Crucial: Check if flatListRef.current is still valid before calling scrollToEnd
         if (flatListRef.current && flatListRef.current !== null) {
-          flatListRef.current.scrollToEnd({ animated: true });
+            try {
+                flatListRef.current.scrollToEnd({ animated: true });
+            } catch (error) {
+                console.warn('Scroll to end failed:', error);
+            }
+
+         
         }
       }, 50); // Small delay, e.g., 50ms, can be adjusted
     }
@@ -308,11 +314,16 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.messagesContainer}
                 onContentSizeChange={() => {
-                    if (flatListRef.current && flatListRef.current !== null) {
+
+                    if (flatListRef.current && messages.length > 0) {
                         setTimeout(() => {
-                            flatListRef.current.scrollToEnd({ animated: true });
+                            try {
+                                flatListRef.current.scrollToEnd({ animated: true });
+                            } catch (error) {
+                                console.warn('Scroll to end failed:', error);
+                            }
                         }, 50);
-                    }
+                      }
                 }}
             />
 
