@@ -13,7 +13,7 @@ import { useCuoral } from './context/CuoralContext'; // Use the context
  * bottom navigation bar. It also manages the initial session loading.
  */
 const CuoralModal = () => {
-    const { closeModal, sessionId, isLoadingSession, sessionError, sessionProfileExists, initiateSession, email, firstName, lastName, chatThemeColor, resetTempUserData } = useCuoral();
+    const { closeModal, sessionId, isLoadingSession, sessionError, sessionProfileExists, initiateSession, email, firstName, lastName, chatThemeColor, resetTempUserData, chatAgentName } = useCuoral();
     const [currentScreen, setCurrentScreen] = useState('Home'); // Default screen if no session/profile
     const [headerTitle, setHeaderTitle] = useState(''); // Default header title
     const [showBackButton, setShowBackButton] = useState(false); // Controls back button visibility
@@ -39,7 +39,7 @@ const CuoralModal = () => {
     useEffect(() => {
         switch (currentScreen) {
             case 'Home':
-                setHeaderTitle('Get in Touch');
+                setHeaderTitle(`${chatAgentName} Support Agent`);
                 setShowBackButton(false);
                 resetTempUserData(); // Clear temporary user data when going to home
                 break;
@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
         flex: 1, // Allow title to take available space
         textAlign: 'center', // Center the title
         letterSpacing: 0.5, // Added letter spacing
+
     },
     headerIcon: {
         fontSize: 30, // Increased icon size for header

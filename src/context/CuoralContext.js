@@ -47,6 +47,7 @@ export const CuoralProvider = ({
 
     const [sessionId, setSessionId] = useState(null); // Cuoral session ID
     const [chatThemeColor, setChatThemeColor] = useState('#2196F3'); // Default color, will be updated from config
+    const [chatAgentName, setChatAgentName] = useState(''); // Default color, will be updated from config
     const [isLoadingSession, setIsLoadingSession] = useState(true); // Loading state for API calls
     const [sessionError, setSessionError] = useState(null); // Error state for API calls
     const [sessionProfileExists, setSessionProfileExists] = useState(false); // New state to track if session has profile info
@@ -154,6 +155,7 @@ export const CuoralProvider = ({
                 await AsyncStorage.setItem(SESSION_STORAGE_KEY, data.session_id);
                 if (data.configuration && data.configuration.color) {
                     setChatThemeColor(data.configuration.color);
+                    setChatAgentName(data.configuration?.config_name)
                 }
 
                 const success = await getSession(data.session_id); // getSession will set status to 'active' or 'closed'
@@ -210,6 +212,7 @@ export const CuoralProvider = ({
                 setSessionId(data.session_id);
                 if (data.configuration && data.configuration.color) {
                     setChatThemeColor(data.configuration.color);
+                    setChatAgentName(data.configuration?.config_name)
                 }
 
                 const sessionEmail = data.email || '';
@@ -360,7 +363,7 @@ export const CuoralProvider = ({
                     }
                     if (newMessageFromSocket.sender === 'bot' || newMessageFromSocket.sender === 'admin') {
                         playNotificationSound();
-                        sendLocalNotification('New Message from Cuoral', newMessageFromSocket.text);
+                        sendLocalNotification(`You have a new message`, newMessageFromSocket.text);
                     }
                     return [...prevMessages, newMessageFromSocket].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
                 });
@@ -498,7 +501,7 @@ export const CuoralProvider = ({
     }, []);
 
 
-    const sendMessageViaSocket = useCallback(async (text, fileData = null, fileName = null) => {
+    const sendMessageViaSocket = useCallback(async (text, fileData = null, fileName = null,message_type="QUERY") => {
         if (!socketRef.current || !socketRef.current.connected || !sessionId) {
             setSessionError('Cannot send message/file: Chat not connected.');
             return;
@@ -508,7 +511,7 @@ export const CuoralProvider = ({
         const basePayload = {
             origin: "frontend",
             message: text,
-            message_type: "QUERY",
+            message_type: message_type,
             channel: 'external',
             author: authorName,
             author_type: "HUMAN",
@@ -557,6 +560,7 @@ export const CuoralProvider = ({
         lastName,
         sessionId,
         chatThemeColor,
+        chatAgentName,
         isLoadingSession,
         sessionError,
         sessionProfileExists,
@@ -575,6 +579,7 @@ export const CuoralProvider = ({
         resetTempUserData,
         clearSessionAndInitiateNew, // Expose new function
         socketInstance: socketRef.current,
+        
     };
 
     return (

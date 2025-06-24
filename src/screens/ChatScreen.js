@@ -220,7 +220,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                     sender: 'admin',
                     timestamp: new Date(),
                 });
-                sendMessageViaSocket(agentResponseMessagePayload.message);
+                sendMessageViaSocket(agentResponseMessagePayload.message, message_type ="REPLY");
                 setEscalatingMessageId(null);
             }, 3000);
         } catch (error) {
@@ -301,11 +301,13 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
         );
     }
 
+    console.log(messages)
+
     return (
         <KeyboardAvoidingView
             style={styles.keyboardAvoidingContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 120 : 0}
         >
             <FlatList
                 ref={flatListRef}
