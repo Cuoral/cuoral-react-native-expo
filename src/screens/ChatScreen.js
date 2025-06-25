@@ -58,7 +58,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
             try {
                 flatListRef.current.scrollToEnd({ animated: true });
             } catch (error) {
-                console.warn('Scroll to end failed:', error);
+            
             }
 
          
@@ -322,7 +322,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                             try {
                                 flatListRef.current.scrollToEnd({ animated: true });
                             } catch (error) {
-                                console.warn('Scroll to end failed:', error);
+                               
                             }
                         }, 50);
                       }
