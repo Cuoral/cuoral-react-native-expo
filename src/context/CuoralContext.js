@@ -179,6 +179,7 @@ export const CuoralProvider = ({
 
     // Function to get a single session's details and messages
     const getSession = useCallback(async (sId) => {
+ 
         if (!sId) {
             setSessionError('Session ID is missing for getSession.');
             setIsLoadingSession(false);
@@ -187,7 +188,7 @@ export const CuoralProvider = ({
         }
         setIsLoadingSession(true);
         setSessionError(null);
-        setSessionStatus('loading');
+        // setSessionStatus('loading');
         try {
             const getSessionPayload = {
                 session_id: sId,
@@ -233,15 +234,18 @@ export const CuoralProvider = ({
                     fileName: msg.filename || null,
                 })).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-                setMessages(loadedMessages);
+                
 
                 if (data.status === 'closed') {
                     setSessionStatus('closed');
+                    setMessages([]);
                     // No socket connection if session is closed
                 } else {
+                    setMessages(loadedMessages);
                     setSessionStatus('active');
                     connectSocket(data.session_id); // Only connect socket if session is active
                 }
+         
                 return true;
             } else {
                 throw new Error('Failed to retrieve session: Invalid session data or missing session ID.');
@@ -434,7 +438,7 @@ export const CuoralProvider = ({
         setSessionId(null);
         setMessages([]); // Clear messages
         setSessionProfileExists(false); // Reset profile status
-        setSessionStatus('loading'); // Set status to loading before initiating new session
+        // setSessionStatus('loading'); // Set status to loading before initiating new session
         setSessionError(null); // Clear any previous session errors
         setIsLoadingSession(true); // Indicate loading for the new session initiation
 
@@ -448,7 +452,7 @@ export const CuoralProvider = ({
     useEffect(() => {
         const setupCuoral = async () => {
             setIsLoadingSession(true);
-            setSessionStatus('loading'); // Explicitly set loading at start of setup
+            // setSessionStatus('loading'); // Explicitly set loading at start of setup
             try {
                 await registerForPushNotificationsAsync();
 

@@ -100,7 +100,7 @@ const CuoralModal = () => {
         if (sessionError) {
             return (
                 <View style={styles.errorContainer}>
-                    {/* <Text style={styles.errorText}>Error: {sessionError}</Text> */}
+                    <Text style={styles.errorText}>Error: {sessionError}</Text>
                     <TouchableOpacity style={styles.retryButton} onPress={() => initiateSession(email, firstName, lastName)}>
                         <Text style={styles.retryButtonText}>Retry</Text>
                     </TouchableOpacity>

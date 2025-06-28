@@ -46,26 +46,31 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
     const flatListRef = useRef(null);
 
 
-  // Scroll to bottom when messages change, with a slight delay
-  useEffect(() => {
-    // Only attempt to scroll if there are messages and the ref potentially exists
-    if (messages.length > 0) {
-      // A small setTimeout ensures the scroll happens after the FlatList has rendered the new content
-      // and calculated its new dimensions.
-      setTimeout(() => {
-        // Crucial: Check if flatListRef.current is still valid before calling scrollToEnd
-        if (flatListRef.current && flatListRef.current !== null) {
-            try {
-                flatListRef.current.scrollToEnd({ animated: true });
-            } catch (error) {
-            
-            }
+    // Scroll to bottom when messages change, with a slight delay
+    useEffect(() => {
+        // Only attempt to scroll if there are messages and the ref potentially exists
+        if (messages.length > 0) {
+            // A small setTimeout ensures the scroll happens after the FlatList has rendered the new content
+            // and calculated its new dimensions.
+            setTimeout(() => {
+                // Crucial: Check if flatListRef.current is still valid before calling scrollToEnd
 
-         
+                if (flatListRef.current && flatListRef.current !== null) {
+                    try {
+                        if (sessionStatus == "closed") {
+                            return
+                        }
+
+                        flatListRef.current.scrollToEnd({ animated: true });
+                    } catch (error) {
+
+                    }
+
+
+                }
+            }, 50); // Small delay, e.g., 50ms, can be adjusted
         }
-      }, 50); // Small delay, e.g., 50ms, can be adjusted
-    }
-  }, [messages]);
+    }, [messages]);
 
     // Determine the ID of the last message from a bot
     const lastBotMessage = messages
@@ -220,7 +225,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                     sender: 'admin',
                     timestamp: new Date(),
                 });
-                sendMessageViaSocket(agentResponseMessagePayload.message, message_type ="REPLY");
+                sendMessageViaSocket(agentResponseMessagePayload.message, message_type = "REPLY");
                 setEscalatingMessageId(null);
             }, 3000);
         } catch (error) {
@@ -286,6 +291,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
     }
 
     // --- Session Closed UI ---
+    // Block re-render if session is closed, regardless of new messages
     if (sessionStatus === 'closed') {
         return (
             <View style={styles.centeredContainer}>
@@ -301,7 +307,6 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
         );
     }
 
-    console.log(messages)
 
     return (
         <KeyboardAvoidingView
@@ -322,10 +327,10 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                             try {
                                 flatListRef.current.scrollToEnd({ animated: true });
                             } catch (error) {
-                               
+
                             }
                         }, 50);
-                      }
+                    }
                 }}
             />
 
