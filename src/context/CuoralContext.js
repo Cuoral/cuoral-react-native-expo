@@ -265,7 +265,7 @@ export const CuoralProvider = ({
     const setProfile = useCallback(async (sId, userEmail, userName) => {
         setIsLoadingSession(true);
         setSessionError(null);
-        setSessionStatus('loading');
+        // setSessionStatus('loading');
         try {
             const payload = {
                 session_id: sId,
