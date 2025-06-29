@@ -35,18 +35,14 @@ const ChatDetailsScreen = ({ navigateTo }) => {
         // Only attempt to redirect if loading is complete and no session errors
         if (!isLoadingSession && !sessionError) {
             if (sessionProfileExists) {
+               
                 // If profile data already exists for the session, go straight to chat
                 navigateTo('Chat');
             }
         }
     }, [isLoadingSession, sessionProfileExists, sessionError, navigateTo]);
 
-
-    useEffect(() => {
-        setTempUserEmail(localEmail);
-        setTempUserName(localName);
-    }, [localEmail, localName, setTempUserEmail, setTempUserName]);
-
+ 
 
     const handleContinueToChat = async () => {
         setErrorMessage(''); // Clear previous errors
@@ -83,6 +79,7 @@ const ChatDetailsScreen = ({ navigateTo }) => {
 
         // Only navigate if action was successful and session/profile are ready
         if (success || (!isLoadingSession && !sessionError && sessionId && sessionProfileExists)) {
+  
             navigateTo('Chat');
         }
     };

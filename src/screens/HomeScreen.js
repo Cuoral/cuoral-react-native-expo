@@ -13,7 +13,7 @@ const HomeScreen = ({ navigateTo }) => {
 
     const handleSendMessagePress = () => {
         if (sessionProfileExists) {
-            navigateTo('Chat'); // Go directly to chat if profile exists
+            navigateTo('Conversations'); // Go directly to chat if profile exists
         } else {
             navigateTo('ChatDetails'); // Otherwise, go to details to collect info
         }

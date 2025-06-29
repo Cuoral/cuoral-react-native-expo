@@ -53,6 +53,8 @@ export const CuoralProvider = ({
     const [sessionProfileExists, setSessionProfileExists] = useState(false); // New state to track if session has profile info
     const [sessionStatus, setSessionStatus] = useState('loading'); // 'loading', 'active', 'closed', 'error'
 
+    const [userSessions,setUserSessions] = useState([])
+
     // Temporary state for email/name input on the details screen (used only in ChatDetailsScreen)
     const [tempUserEmail, setTempUserEmail] = useState('');
     const [tempUserName, setTempUserName] = useState('');
@@ -62,6 +64,7 @@ export const CuoralProvider = ({
 
     // API Endpoints
     const initiateSessionUrl = "https://api.cuoral.com/conversation/initiate-session";
+    const getuserSessionUrl = "https://api.cuoral.com/conversation/get-all-customer-sessions";
     const getSessionUrl = "https://api.cuoral.com/conversation/get-single-session";
     const setProfileUrl = "https://api.cuoral.com/conversation/set-profile";
     const fileUploadUrl = "https://api.cuoral.com/file-upload";
@@ -177,15 +180,66 @@ export const CuoralProvider = ({
         }
     }, [publicKey, getSession]);
 
+
+    // Function to get user sessions
+    const getUserSessions = useCallback(async (userEmail = undefined) => {
+        // setIsLoadingSession(true);
+        setSessionError(null);
+        if (userEmail){
+        try {
+            const getSessionPayload = {
+                public_key: publicKey,
+                email: userEmail,
+            };
+   
+            const response = await fetch(getuserSessionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "x-org-id": publicKey || "undefined"
+                },
+                body: JSON.stringify(getSessionPayload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            setUserSessions(data)
+          
+            return true;
+          
+        } catch (error) {
+            setSessionError(error.message || 'Failed to initiate chat session.');
+            return false;
+        } finally {
+            // setIsLoadingSession(false);
+        }
+    }
+    }, [publicKey]);
+
+
+
     // Function to get a single session's details and messages
     const getSession = useCallback(async (sId) => {
  
-        if (!sId) {
-            setSessionError('Session ID is missing for getSession.');
-            setIsLoadingSession(false);
-            setSessionStatus('error');
-            return false;
+        // if (!sId) {
+        //     setSessionError('Session ID is missing for getSession.');
+        //     setIsLoadingSession(false);
+        //     setSessionStatus('error');
+        //     return false;
+        // }
+       
+        if(!sId){
+            sId = await AsyncStorage.getItem('cuoral_session_id');
         }
+        else if(typeof sIdd != String ){
+            sId = await AsyncStorage.getItem('cuoral_session_id');
+        }
+
         setIsLoadingSession(true);
         setSessionError(null);
         // setSessionStatus('loading');
@@ -193,7 +247,7 @@ export const CuoralProvider = ({
             const getSessionPayload = {
                 session_id: sId,
             };
-
+            
             const response = await fetch(getSessionUrl, {
                 method: 'POST',
                 headers: {
@@ -218,7 +272,7 @@ export const CuoralProvider = ({
 
                 const sessionEmail = data.email || '';
                 const sessionName = data.name || '';
-                setEmail(sessionEmail);
+                //setEmail(sessionEmail);
                 const nameParts = sessionName.split(' ');
                 setFirstName(nameParts[0] || '');
                 setLastName(nameParts.slice(1).join(' ') || '');
@@ -259,6 +313,75 @@ export const CuoralProvider = ({
             setIsLoadingSession(false);
         }
     }, [publicKey, connectSocket, initiateSession]);
+
+
+    // Function to get a single session's details and messages
+    const getSessionReload = useCallback(async (sId) => {
+ 
+        if (!sId) {
+            sId = await AsyncStorage.getItem('cuoral_session_id');
+        }
+        else if (typeof sIdd != String) {
+            sId = await AsyncStorage.getItem('cuoral_session_id');
+        }
+  
+        try {
+            const getSessionPayload = {
+                session_id: sId,
+            };
+
+            const response = await fetch(getSessionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "x-org-id": publicKey || "undefined",
+                },
+                body: JSON.stringify(getSessionPayload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.message || response.statusText}`);
+            }
+
+            const data = await response.json();
+            if (data.session_id) {
+                
+ 
+                const loadedMessages = data.messages.map(msg => ({
+                    id: msg.time_created || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+                    text: msg.message,
+                    sender: msg.message_type === 'REPLY' ? msg.author_type === 'HUMAN' ? 'admin' : 'bot' : 'user',
+                    timestamp: new Date(msg.time_created),
+                    fileUrl: msg.file_url || null,
+                    fileName: msg.filename || null,
+                })).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+
+
+                if (data.status === 'closed') {
+                    setSessionStatus('closed');
+                    setMessages([]);
+                    // No socket connection if session is closed
+                } else {
+                    setMessages(loadedMessages);
+                    setSessionStatus('active');
+                    connectSocket(data.session_id); // Only connect socket if session is active
+                }
+
+                return true;
+            } else {
+                throw new Error('Failed to retrieve session: Invalid session data or missing session ID.');
+            }
+        } catch (error) {
+
+            setSessionError(error.message || 'Failed to load chat session.');
+            setSessionStatus('error');
+            return false;
+        } finally {
+            setIsLoadingSession(false);
+        }
+    }, [publicKey]);
 
 
     // Function to set user profile for an existing session
@@ -583,6 +706,10 @@ export const CuoralProvider = ({
         resetTempUserData,
         clearSessionAndInitiateNew, // Expose new function
         socketInstance: socketRef.current,
+        userSessions,
+        getUserSessions,
+        setSessionId,
+        getSessionReload
         
     };
 

@@ -7,6 +7,7 @@ import ChatDetailsScreen from './screens/ChatDetailsScreen';
 import ChatScreen from './screens/ChatScreen';
 import { useCuoral } from './context/CuoralContext'; // Use the context
 
+
 /**
  * CuoralModal component manages the navigation between different chat screens
  * within the modal launched by CuoralLauncher. It includes the header and
@@ -18,13 +19,13 @@ const CuoralModal = () => {
     const [headerTitle, setHeaderTitle] = useState(''); // Default header title
     const [showBackButton, setShowBackButton] = useState(false); // Controls back button visibility
 
-    // Determine initial screen based on session and profile status
+
     useEffect(() => {
         // Only set initial screen once loading is complete and no errors
         if (!isLoadingSession && !sessionError) {
             if (sessionId) {
                 if (sessionProfileExists) {
-                    setCurrentScreen('Chat'); // Go directly to chat if session and profile exist
+                    setCurrentScreen('Conversations'); // Go directly to chat if session and profile exist
                 } else {
                     setCurrentScreen('ChatDetails'); // Go to details if session exists but profile is missing
                 }
@@ -32,14 +33,14 @@ const CuoralModal = () => {
                 setCurrentScreen('Home'); // Default to Home if no session at all (or session loading failed/expired)
             }
         }
-    }, [sessionId, isLoadingSession, sessionError, sessionProfileExists]);
+    },[setCurrentScreen]);
 
 
     // Effect to update header title and back button visibility based on currentScreen
     useEffect(() => {
         switch (currentScreen) {
             case 'Home':
-                setHeaderTitle(`${chatAgentName} Support Agent`);
+                setHeaderTitle(`${chatAgentName} Agent`);
                 setShowBackButton(false);
                 resetTempUserData(); // Clear temporary user data when going to home
                 break;
@@ -78,7 +79,7 @@ const CuoralModal = () => {
                 break;
             case 'Chat':
                 // Simplified: always go back to Home from chat
-                navigateTo('Home');
+                navigateTo('Conversations');
                 break;
             default:
                 closeModal(); // If no specific back logic, just close the modal
@@ -160,7 +161,7 @@ const CuoralModal = () => {
                 >
                     <Text style={[styles.navIcon, currentScreen === 'Conversations' && { color: chatThemeColor }]}>💬</Text>
                     <Text style={[styles.navText, currentScreen === 'Conversations' && { color: chatThemeColor, fontWeight: 'bold' }]}>
-                        Message
+                        Messages
                     </Text>
                 </TouchableOpacity>
             </View>

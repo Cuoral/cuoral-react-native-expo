@@ -17,6 +17,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useCuoral } from '../context/CuoralContext';
 
+
 /**
  * ChatScreen component displays the chat interface, including messages,
  * an input field, and send button. It now sends messages via Socket.IO
@@ -38,12 +39,25 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
         lastName,
         sessionStatus, // New: Get sessionStatus from context
         clearSessionAndInitiateNew, // New: Get clearSessionAndInitiateNew from context
+        getSession,
+        getSessionReload,
     } = useCuoral();
 
     const [inputText, setInputText] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [escalatingMessageId, setEscalatingMessageId] = useState(null);
     const flatListRef = useRef(null);
+
+
+     // Effect to fetch user sessions when the component mounts
+        useEffect(() => {
+            // Ensure email is available before trying to fetch sessions
+            if (email) {
+                getSessionReload(sessionId);
+            }
+        }, [email]); // Dependency on email ensures fetch happens when email becomes available
+    
+
 
 
     // Scroll to bottom when messages change, with a slight delay
@@ -219,13 +233,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                     conversation_id: sessionId,
                     organisation_id: publicKey,
                 };
-                addMessage({
-                    id: Date.now().toString() + '_escalation_bot_reply',
-                    text: agentResponseMessagePayload.message,
-                    sender: 'admin',
-                    timestamp: new Date(),
-                });
-                sendMessageViaSocket(agentResponseMessagePayload.message, message_type = "REPLY");
+                sendMessageViaSocket(agentResponseMessagePayload.message,null, null, "REPLY");
                 setEscalatingMessageId(null);
             }, 3000);
         } catch (error) {
@@ -255,7 +263,7 @@ const ChatScreen = ({ navigateTo }) => { // Added navigateTo prop
                 {item.text.length > 0 && <Text style={styles.messageText}>{item.text}</Text>}
                 <Text style={styles.timestamp}>{item.timestamp.toLocaleTimeString()}</Text>
             </View>
-            {item.sender === 'bot' && item.id === lastBotMessageId && (escalatingMessageId === null) && (
+            {item.sender === 'bot' && item.id === lastBotMessageId && (escalatingMessageId === null && !item.text?.includes("An internal") ) && (
                 <TouchableOpacity
                     style={[styles.escalateButton, { borderColor: chatThemeColor || '#2196F3', marginBottom: 5 }]}
                     onPress={() => handleEscalateToAgent(item.id)}
