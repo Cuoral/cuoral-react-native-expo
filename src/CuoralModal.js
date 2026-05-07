@@ -2,6 +2,13 @@
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { Alert } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import * as SecureStore from 'expo-secure-store';
+
+const LAST_OPENED_KEY = '__cuoral_last_opened';
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+// Enable caching for WebBrowser - reuses existing session
+WebBrowser.maybeCompleteAuthSession();
 
 /**
  * CuoralModal component displays the widget using expo-web-browser
@@ -14,14 +21,33 @@ const CuoralModal = forwardRef(({
   useImperativeHandle(ref, () => ({
     open: async () => {
       try {
+        // Check cache - if opened recently, skip
+        const lastOpened = await SecureStore.getItemAsync(LAST_OPENED_KEY);
+        if (lastOpened) {
+          const timeSinceLastOpen = Date.now() - parseInt(lastOpened, 10);
+          if (timeSinceLastOpen < CACHE_DURATION) {
+            // Within cache window - skip opening
+            if (onClose) {
+              onClose();
+            }
+            return;
+          }
+        }
+        
+        // Open with minimal controls
         await WebBrowser.openBrowserAsync(widgetUrl, {
-          toolbarColor: primaryColor || '#007AFF',
-          controlsColor: '#ffffff',
-          dismissButtonStyle: 'close',
-          readerMode: false,
-          enableBarCollapsing: false,
-          showTitle: false,
+          // Hide toolbar completely
+          showInRecents: false,
+          enableBarCollapsing: true,
+          
+          // iOS specific - minimal UI
+          ...(require('react-native').Platform.OS === 'ios' && {
+            presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+          }),
         });
+        
+        // Store last opened timestamp
+        await SecureStore.setItemAsync(LAST_OPENED_KEY, Date.now().toString());
         
         if (onClose) {
           onClose();

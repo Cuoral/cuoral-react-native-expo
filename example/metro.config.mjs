@@ -10,14 +10,6 @@ const workspaceRoot = path.resolve(__dirname, '..');
 
 const config = getDefaultConfig(projectRoot);
 
-// Watch parent workspace
-config.watchFolders = [workspaceRoot];
-
-// Block ONLY the library's source directory (not compiled lib)
-config.resolver.blockList = [
-  new RegExp(`^${workspaceRoot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/src/`),
-];
-
 // Fix hoisted deps
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

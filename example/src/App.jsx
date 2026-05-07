@@ -15,6 +15,9 @@ const App = () => {
       
       <CuoralLauncher
         publicKey="c8e3081e-8dfc-49b5-bbd1-4ef513504d88"
+        email="kayode@cuoral.com"
+        firstName="Kayode"
+        lastName="Olayiwola"
         buttonColor="#007AFF"
         showFloatingButton={true}
       />
