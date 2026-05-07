@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import CuoralModal from './CuoralModal';
+import MessageCircleIcon from './MessageCircleIcon';
 import {
   initializeIntelligence,
   trackPageView as intelligenceTrackPageView,
@@ -41,7 +42,7 @@ const CuoralLauncher = forwardRef(({
   buttonColor = '#007AFF',
   buttonPosition = 'bottomRight',
   buttonSize = 60,
-  buttonIcon = '💬',
+  buttonIcon = null, // null = use default SVG icon, or pass string for custom text icon
 }, ref) => {
   const [sessionId, setSessionId] = useState(null);
   const [widgetUrl, setWidgetUrl] = useState('');
@@ -476,7 +477,11 @@ const CuoralLauncher = forwardRef(({
           onPress={openModal}
           activeOpacity={0.8}
         >
-          <Text style={styles.fabIcon}>{buttonIcon}</Text>
+          {buttonIcon ? (
+            <Text style={styles.fabIcon}>{buttonIcon}</Text>
+          ) : (
+            <MessageCircleIcon size={buttonSize * 0.5} color="#ffffff" />
+          )}
         </TouchableOpacity>
       )}
 
