@@ -32,6 +32,15 @@ const CuoralModal = forwardRef(({
             dismissButtonStyle: 'close',
             readerMode: false,
           }),
+          
+          // Android: Hide URL bar and minimize chrome
+          ...(require('react-native').Platform.OS === 'android' && {
+            toolbarColor: primaryColor || '#007AFF',
+            secondaryToolbarColor: primaryColor || '#007AFF',
+            navigationBarColor: '#000000',
+            enableUrlBarHiding: true, // Hides URL bar when scrolling
+            showTitle: false, // Don't show page title
+          }),
         });
         
         if (onClose) {
