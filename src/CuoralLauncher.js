@@ -7,7 +7,6 @@ import {
   Text,
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import axios from 'axios';
 import CuoralModal from './CuoralModal';
 import MessageCircleIcon from './MessageCircleIcon';
 import {
@@ -208,14 +207,12 @@ const CuoralLauncher = forwardRef(({
           
           if (sessionInfo) {
             log('Session is valid!');
-            // Session valid
             setSessionId(existingSessionId);
             
             if (sessionInfo.configuration?.color) {
               setPrimaryColor(sessionInfo.configuration.color);
             }
             
-            // Initialize intelligence if enabled
             if (sessionInfo.configuration?.customer_intelligence) {
               log('Customer intelligence is enabled, initializing...');
               await initializeIntelligence(existingSessionId, debug);
@@ -224,7 +221,6 @@ const CuoralLauncher = forwardRef(({
               log('Customer intelligence is NOT enabled in backend config');
             }
             
-            // Set profile if needed (only if session has no email)
             await setProfileIfNeeded(existingSessionId, sessionInfo);
             
             log('Using existing session:', existingSessionId);
@@ -236,7 +232,6 @@ const CuoralLauncher = forwardRef(({
           log('Invalid session data format, clearing:', parseError);
         }
         
-        // Clear invalid/expired session
         log('Clearing invalid session from storage');
         await SecureStore.deleteItemAsync(SESSION_KEY);
       } else {
@@ -248,14 +243,12 @@ const CuoralLauncher = forwardRef(({
       const newSessionId = await initiateSession();
       if (newSessionId) {
         log('New session created:', newSessionId);
-        // Save with timestamp
         await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify({
           sessionId: newSessionId,
           createdAt: Date.now(),
         }));
         
         setSessionId(newSessionId);
-        log('Created new session:', newSessionId);
         
         // Fetch config and initialize intelligence
         log('Fetching session config...');
@@ -274,7 +267,6 @@ const CuoralLauncher = forwardRef(({
             log('Customer intelligence is NOT enabled in backend config');
           }
           
-          // Set profile for new session
           await setProfileIfNeeded(newSessionId, sessionInfo);
         } else {
           log('Could not fetch session info');
@@ -284,7 +276,6 @@ const CuoralLauncher = forwardRef(({
       }
     } catch (error) {
       log('ERROR in initializeSession:', error);
-      // Fail gracefully - don't crash the app
     }
   };
 
@@ -294,32 +285,28 @@ const CuoralLauncher = forwardRef(({
    */
   const setProfileIfNeeded = async (sid, sessionInfo) => {
     try {
-      // Only set profile if:
-      // 1. User provided email, firstName, lastName (all non-empty)
-      // 2. Session doesn't have email yet
       if (email && firstName && lastName && !sessionInfo.email) {
         log('Setting profile for session:', sid);
         
-        const response = await axios.post('https://api.cuoral.com/conversation/set-profile', {
-          session_id: sid,
-          email: email,
-          name: `${firstName} ${lastName}`,
-        }, {
+        const response = await fetch('https://api.cuoral.com/conversation/set-profile', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'x-org-id': publicKey,
           },
+          body: JSON.stringify({
+            session_id: sid,
+            email: email,
+            name: `${firstName} ${lastName}`,
+          }),
         });
 
-        if (response.status === 200) {
+        if (response.ok) {
           log('Profile set successfully');
-        } else {
-          log('Failed to set profile:', response.status);
         }
       }
     } catch (error) {
       log('Error setting profile:', error.message);
-      // Fail silently
     }
   };
 
@@ -329,45 +316,30 @@ const CuoralLauncher = forwardRef(({
    */
   const fetchSessionInfo = async (sid) => {
     try {
-      const response = await axios.post('https://api.cuoral.com/conversation/session/get', {
-        session_id: sid,
-      }, {
+      const response = await fetch('https://api.cuoral.com/conversation/session/get', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-org-id': publicKey,
         },
-        validateStatus: () => true, // Don't throw on any status
+        body: JSON.stringify({ session_id: sid }),
       });
 
-      // Handle 502/504 - keep using session with intelligence enabled
       if (response.status === 502 || response.status === 504) {
-        log('Backend unavailable (502/504), assuming intelligence enabled');
         return {
           configuration: { customer_intelligence: true },
           email: null,
         };
       }
 
-      // Session not found or invalid
-      if (response.status === 404 || response.status === 400) {
+      if (response.status === 404 || response.status === 400 || !response.ok) {
         return null;
       }
 
-      if (response.status !== 200) {
-        return null;
-      }
-
-      const data = response.data;
-      
-      // Check if expired
-      if (data.is_expired) {
-        return null;
-      }
-      
-      return data;
+      const data = await response.json();
+      return data.is_expired ? null : data;
     } catch (error) {
       log('Error fetching session info:', error.message);
-      // On network error, assume intelligence enabled
       return {
         configuration: { customer_intelligence: true },
         email: null,
@@ -389,29 +361,30 @@ const CuoralLauncher = forwardRef(({
       };
       log('Request body:', requestBody);
       
-      const response = await axios.post('https://api.cuoral.com/conversation/initiate-session', requestBody, {
+      const response = await fetch('https://api.cuoral.com/conversation/initiate-session', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-org-id': publicKey,
         },
-        validateStatus: () => true, // Don't throw on any status
+        body: JSON.stringify(requestBody),
       });
 
       log('Initiate session response status:', response.status);
 
-      // Handle 502/504 gracefully
       if (response.status === 502 || response.status === 504) {
         log('Backend unavailable during session creation (502/504)');
         return null;
       }
 
-      if (response.status !== 200) {
+      if (!response.ok) {
         log('Initiate session failed with status:', response.status);
-        log('Error response:', response.data);
+        const errorText = await response.text();
+        log('Error response:', errorText);
         return null;
       }
 
-      const data = response.data;
+      const data = await response.json();
       log('Initiate session response data:', data);
       const sessionId = data.status && data.session_id ? data.session_id : null;
       log('Extracted session ID:', sessionId);
