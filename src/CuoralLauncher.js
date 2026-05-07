@@ -177,20 +177,25 @@ const CuoralLauncher = forwardRef(({
    * Matches Flutter SDK session management logic
    */
   const initializeSession = async () => {
+    log('=== Starting session initialization ===');
     try {
       // Check for existing session
+      log('Checking for existing session...');
       const sessionData = await SecureStore.getItemAsync(SESSION_KEY);
       
       if (sessionData) {
+        log('Found stored session data:', sessionData);
         try {
           const { sessionId: existingSessionId, createdAt } = JSON.parse(sessionData);
           
           log('Found session:', existingSessionId);
           
           // Validate with backend
+          log('Validating session with backend...');
           const sessionInfo = await fetchSessionInfo(existingSessionId);
           
           if (sessionInfo) {
+            log('Session is valid!');
             // Session valid
             setSessionId(existingSessionId);
             
@@ -200,8 +205,11 @@ const CuoralLauncher = forwardRef(({
             
             // Initialize intelligence if enabled
             if (sessionInfo.configuration?.customer_intelligence) {
+              log('Customer intelligence is enabled, initializing...');
               await initializeIntelligence(existingSessionId, debug);
               log('Intelligence initialized');
+            } else {
+              log('Customer intelligence is NOT enabled in backend config');
             }
             
             // Set profile if needed (only if session has no email)
@@ -209,18 +217,25 @@ const CuoralLauncher = forwardRef(({
             
             log('Using existing session:', existingSessionId);
             return;
+          } else {
+            log('Session validation failed - session might be expired or invalid');
           }
         } catch (parseError) {
-          log('Invalid session data format, clearing');
+          log('Invalid session data format, clearing:', parseError);
         }
         
         // Clear invalid/expired session
+        log('Clearing invalid session from storage');
         await SecureStore.deleteItemAsync(SESSION_KEY);
+      } else {
+        log('No existing session found in storage');
       }
       
       // Create new session
+      log('Creating new session...');
       const newSessionId = await initiateSession();
       if (newSessionId) {
+        log('New session created:', newSessionId);
         // Save with timestamp
         await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify({
           sessionId: newSessionId,
@@ -231,22 +246,32 @@ const CuoralLauncher = forwardRef(({
         log('Created new session:', newSessionId);
         
         // Fetch config and initialize intelligence
+        log('Fetching session config...');
         const sessionInfo = await fetchSessionInfo(newSessionId);
         if (sessionInfo) {
+          log('Session info retrieved:', sessionInfo);
           if (sessionInfo.configuration?.color) {
             setPrimaryColor(sessionInfo.configuration.color);
           }
           
           if (sessionInfo.configuration?.customer_intelligence) {
+            log('Customer intelligence is enabled, initializing...');
             await initializeIntelligence(newSessionId, debug);
             log('Intelligence initialized');
+          } else {
+            log('Customer intelligence is NOT enabled in backend config');
           }
           
           // Set profile for new session
           await setProfileIfNeeded(newSessionId, sessionInfo);
+        } else {
+          log('Could not fetch session info');
         }
+      } else {
+        log('ERROR: Failed to create new session - initiateSession returned null');
       }
     } catch (error) {
+      log('ERROR in initializeSession:', error);
       // Fail gracefully - don't crash the app
     }
   };
@@ -345,36 +370,48 @@ const CuoralLauncher = forwardRef(({
    * Initiate a new session with backend
    */
   const initiateSession = async () => {
+    log('Calling initiate-session API...');
     try {
+      const requestBody = {
+        public_key: publicKey,
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+      };
+      log('Request body:', requestBody);
+      
       const response = await fetch('https://api.cuoral.com/conversation/initiate-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-org-id': publicKey,
         },
-        body: JSON.stringify({
-          public_key: publicKey,
-          email: email,
-          first_name: firstName,
-          last_name: lastName,
-        }),
+        body: JSON.stringify(requestBody),
         timeout: 10000,
       });
 
+      log('Initiate session response status:', response.status);
+
       // Handle 502/504 gracefully
       if (response.status === 502 || response.status === 504) {
-        log('Backend unavailable during session creation');
+        log('Backend unavailable during session creation (502/504)');
         return null;
       }
 
       if (!response.ok) {
+        log('Initiate session failed with status:', response.status);
+        const errorText = await response.text();
+        log('Error response:', errorText);
         return null;
       }
 
       const data = await response.json();
-      return data.status && data.session_id ? data.session_id : null;
+      log('Initiate session response data:', data);
+      const sessionId = data.status && data.session_id ? data.session_id : null;
+      log('Extracted session ID:', sessionId);
+      return sessionId;
     } catch (error) {
-      log('Failed to initiate session:', error.message);
+      log('Failed to initiate session - ERROR:', error.message, error);
       return null;
     }
   };
