@@ -310,7 +310,6 @@ const CuoralLauncher = forwardRef(({
             email: email,
             name: `${firstName} ${lastName}`,
           }),
-          timeout: 10000,
         });
 
         if (response.ok) {
@@ -338,7 +337,6 @@ const CuoralLauncher = forwardRef(({
           'x-org-id': publicKey,
         },
         body: JSON.stringify({ session_id: sid }),
-        timeout: 10000,
       });
 
       // Handle 502/504 - keep using session with intelligence enabled
@@ -398,7 +396,6 @@ const CuoralLauncher = forwardRef(({
           'x-org-id': publicKey,
         },
         body: JSON.stringify(requestBody),
-        timeout: 10000,
       });
 
       log('Initiate session response status:', response.status);
