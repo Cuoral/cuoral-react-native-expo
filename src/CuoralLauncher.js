@@ -7,6 +7,7 @@ import {
   Text,
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import axios from 'axios';
 import CuoralModal from './CuoralModal';
 import MessageCircleIcon from './MessageCircleIcon';
 import {
@@ -299,20 +300,18 @@ const CuoralLauncher = forwardRef(({
       if (email && firstName && lastName && !sessionInfo.email) {
         log('Setting profile for session:', sid);
         
-        const response = await fetch('https://api.cuoral.com/conversation/set-profile', {
-          method: 'POST',
+        const response = await axios.post('https://api.cuoral.com/conversation/set-profile', {
+          session_id: sid,
+          email: email,
+          name: `${firstName} ${lastName}`,
+        }, {
           headers: {
             'Content-Type': 'application/json',
             'x-org-id': publicKey,
           },
-          body: JSON.stringify({
-            session_id: sid,
-            email: email,
-            name: `${firstName} ${lastName}`,
-          }),
         });
 
-        if (response.ok) {
+        if (response.status === 200) {
           log('Profile set successfully');
         } else {
           log('Failed to set profile:', response.status);
@@ -330,13 +329,14 @@ const CuoralLauncher = forwardRef(({
    */
   const fetchSessionInfo = async (sid) => {
     try {
-      const response = await fetch('https://api.cuoral.com/conversation/session/get', {
-        method: 'POST',
+      const response = await axios.post('https://api.cuoral.com/conversation/session/get', {
+        session_id: sid,
+      }, {
         headers: {
           'Content-Type': 'application/json',
           'x-org-id': publicKey,
         },
-        body: JSON.stringify({ session_id: sid }),
+        validateStatus: () => true, // Don't throw on any status
       });
 
       // Handle 502/504 - keep using session with intelligence enabled
@@ -353,11 +353,11 @@ const CuoralLauncher = forwardRef(({
         return null;
       }
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         return null;
       }
 
-      const data = await response.json();
+      const data = response.data;
       
       // Check if expired
       if (data.is_expired) {
@@ -389,13 +389,12 @@ const CuoralLauncher = forwardRef(({
       };
       log('Request body:', requestBody);
       
-      const response = await fetch('https://api.cuoral.com/conversation/initiate-session', {
-        method: 'POST',
+      const response = await axios.post('https://api.cuoral.com/conversation/initiate-session', requestBody, {
         headers: {
           'Content-Type': 'application/json',
           'x-org-id': publicKey,
         },
-        body: JSON.stringify(requestBody),
+        validateStatus: () => true, // Don't throw on any status
       });
 
       log('Initiate session response status:', response.status);
@@ -406,14 +405,13 @@ const CuoralLauncher = forwardRef(({
         return null;
       }
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         log('Initiate session failed with status:', response.status);
-        const errorText = await response.text();
-        log('Error response:', errorText);
+        log('Error response:', response.data);
         return null;
       }
 
-      const data = await response.json();
+      const data = response.data;
       log('Initiate session response data:', data);
       const sessionId = data.status && data.session_id ? data.session_id : null;
       log('Extracted session ID:', sessionId);
