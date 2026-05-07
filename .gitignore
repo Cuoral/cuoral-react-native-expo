@@ -84,3 +84,17 @@ android/generated
 
 # React Native Nitro Modules
 nitrogen/
+
+# Test artifacts
+test-app/
+test-sdk.js
+*.log
+*.log.*
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Symlinks
+cuoral-react-native-expo

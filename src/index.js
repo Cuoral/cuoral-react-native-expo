@@ -1,7 +1,9 @@
 // index.js
-// This file serves as the main entry point for your native Cuoral React Native SDK.
-// It exports the primary component, CuoralLauncher, which integrates the chat functionality.
+// Main entry point for Cuoral React Native Expo SDK
+// Expo managed workflow with expo-web-browser
 
 import CuoralLauncher from './CuoralLauncher.js';
+import { CuoralMessageType } from './types.js';
 
-export { CuoralLauncher };
+export { CuoralLauncher, CuoralMessageType };
+export default CuoralLauncher;
