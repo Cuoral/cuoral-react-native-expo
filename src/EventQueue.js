@@ -76,7 +76,6 @@ export class EventQueue {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(eventsToSend),
-        timeout: 10000, // 10s timeout
       });
 
       // If more events remain, reset timer
