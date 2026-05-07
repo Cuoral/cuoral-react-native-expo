@@ -10,14 +10,13 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",
-    "axios": "^1.7.9",
-    "cuoral-react-native-expo": "^1.1.13",
+    "cuoral-react-native-expo": "^1.1.14",
     "expo": "~54.0.0",
     "expo-secure-store": "~14.0.0",
     "expo-status-bar": "~2.0.0",
     "expo-web-browser": "~14.0.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "react-native": "0.81.5",
     "react-native-svg": "~15.0.0",
     "react-native-web": "~0.19.13"

@@ -84,17 +84,13 @@ class IntelligenceManager {
    */
   trackPageView(screen, metadata = {}) {
     if (!this.sessionId) {
-      console.log('[Intelligence] Cannot track page view - no session ID');
       return;
     }
-
-    console.log('[Intelligence] Tracking page view:', screen, metadata);
 
     // Filter out invalid screen names (like Flutter SDK does)
     if (!screen || screen.includes('(') || screen.includes(')') || 
         screen.includes('<') || screen.includes('>') || 
         screen.includes('RouteSettings') || screen.includes('Controller')) {
-      console.log('[Intelligence] Skipping invalid screen name:', screen);
       return;
     }
 
@@ -145,11 +141,8 @@ class IntelligenceManager {
    */
   trackCustomEvent(name, category, properties = {}, elementSelector = '', elementText = '') {
     if (!this.sessionId) {
-      console.log('[Intelligence] Cannot track custom event - no session ID');
       return;
     }
-
-    console.log('[Intelligence] Tracking custom event:', name, category, properties);
 
     const customEvent = {
       session_id: this.sessionId,

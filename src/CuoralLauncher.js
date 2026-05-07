@@ -50,8 +50,6 @@ const CuoralLauncher = forwardRef(({
   
   const modalRef = useRef(null);
 
-  console.log('[Cuoral] CuoralLauncher rendered, sessionId:', sessionId, 'publicKey:', publicKey);
-
   // Expose tracking methods via ref
   useImperativeHandle(ref, () => ({
     /**
@@ -60,7 +58,6 @@ const CuoralLauncher = forwardRef(({
      * @param {object} metadata - Optional additional data
      */
     trackPageView: (screen, metadata = {}) => {
-      console.log('[Cuoral] trackPageView called:', screen, metadata);
       intelligenceTrackPageView(screen, metadata);
     },
 
@@ -71,7 +68,6 @@ const CuoralLauncher = forwardRef(({
      * @param {object} metadata - Optional additional data
      */
     trackError: (message, stackTrace = '', metadata = {}) => {
-      console.log('[Cuoral] trackError called:', message);
       intelligenceTrackError(message, stackTrace, metadata);
     },
 
@@ -82,7 +78,6 @@ const CuoralLauncher = forwardRef(({
      * @param {object} properties - Custom properties object
      */
     trackCustomEvent: (name, category, properties = {}) => {
-      console.log('[Cuoral] trackCustomEvent called:', name, category, properties);
       intelligenceTrackCustomEvent(name, category, properties);
     },
 
@@ -90,7 +85,6 @@ const CuoralLauncher = forwardRef(({
      * Open the modal/browser programmatically
      */
     open: () => {
-      console.log('[Cuoral] open() called');
       openModal();
     },
 
@@ -98,7 +92,6 @@ const CuoralLauncher = forwardRef(({
      * Close the modal programmatically (WebView mode only)
      */
     close: () => {
-      console.log('[Cuoral] close() called');
       if (modalRef.current) {
         modalRef.current.close();
       }
@@ -108,7 +101,6 @@ const CuoralLauncher = forwardRef(({
      * Get the current session ID
      */
     getSessionId: () => {
-      console.log('[Cuoral] getSessionId() called, returning:', sessionId);
       return sessionId;
     },
 
@@ -116,7 +108,6 @@ const CuoralLauncher = forwardRef(({
      * Flush all intelligence queues
      */
     flush: async () => {
-      console.log('[Cuoral] flush() called');
       await flushIntelligence();
     },
 
@@ -467,8 +458,9 @@ const CuoralLauncher = forwardRef(({
    * Log debug messages
    */
   const log = (...args) => {
-    // ALWAYS log for now to debug issues
-    console.log('[Cuoral]', ...args);
+    if (debug) {
+      console.log('[Cuoral]', ...args);
+    }
   };
 
   if (!publicKey) {
