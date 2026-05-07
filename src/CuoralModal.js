@@ -24,11 +24,13 @@ const CuoralModal = forwardRef(({
           createTask: false,
           showInRecents: false,
           
-          // iOS: SFSafariViewController (cannot hide URL bar/toolbar - iOS security requirement)
+          // iOS: Use full screen to maximize widget display
           ...(require('react-native').Platform.OS === 'ios' && {
-            presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+            presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
             preferredBarTintColor: primaryColor || '#007AFF',
             preferredControlTintColor: '#ffffff',
+            dismissButtonStyle: 'close',
+            readerMode: false,
           }),
         });
         
