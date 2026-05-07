@@ -14,17 +14,31 @@ const App = () => {
 
   // Track initial page view on mount
   useEffect(() => {
-    if (cuoralRef.current) {
-      cuoralRef.current.trackPageView('/home', {
-        screen: 'HomeScreen',
-        timestamp: new Date().toISOString(),
-      });
-    }
+    console.log('=== App mounted ===');
+    console.log('cuoralRef.current at mount:', cuoralRef.current);
+    
+    // Small delay to ensure Cuoral is initialized
+    const timer = setTimeout(() => {
+      console.log('=== Attempting to track initial page view ===');
+      if (cuoralRef.current) {
+        console.log('cuoralRef is ready, tracking /home page view');
+        cuoralRef.current.trackPageView('/home', {
+          screen: 'HomeScreen',
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        console.log('ERROR: cuoralRef.current is still null after delay!');
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Handle button click with custom event
   const handleAddToCart = () => {
+    console.log('=== Add to Cart button clicked ===');
     if (cuoralRef.current) {
+      console.log('cuoralRef.current exists, calling trackCustomEvent...');
       cuoralRef.current.trackCustomEvent(
         'add_to_cart',
         'ecommerce',
@@ -35,12 +49,16 @@ const App = () => {
           quantity: 1,
         }
       );
+    } else {
+      console.log('ERROR: cuoralRef.current is null!');
     }
   };
 
   // Track checkout event
   const handleCheckout = () => {
+    console.log('=== Checkout button clicked ===');
     if (cuoralRef.current) {
+      console.log('cuoralRef.current exists, calling trackCustomEvent...');
       cuoralRef.current.trackCustomEvent(
         'checkout_started',
         'conversion',
@@ -49,22 +67,30 @@ const App = () => {
           items_count: 2,
         }
       );
+    } else {
+      console.log('ERROR: cuoralRef.current is null!');
     }
   };
 
   // Track navigation
   const handleNavigateToProduct = () => {
+    console.log('=== Navigate to Product button clicked ===');
     if (cuoralRef.current) {
+      console.log('cuoralRef.current exists, calling trackPageView...');
       cuoralRef.current.trackPageView('/product/12345', {
         product_name: 'Test Product',
         category: 'Electronics',
       });
+    } else {
+      console.log('ERROR: cuoralRef.current is null!');
     }
   };
 
   // Track search
   const handleSearch = () => {
+    console.log('=== Search button clicked ===');
     if (cuoralRef.current) {
+      console.log('cuoralRef.current exists, calling trackCustomEvent...');
       cuoralRef.current.trackCustomEvent(
         'search_performed',
         'navigation',
@@ -73,20 +99,26 @@ const App = () => {
           results_count: 24,
         }
       );
+    } else {
+      console.log('ERROR: cuoralRef.current is null!');
     }
   };
 
   // Flush all events manually
   const handleFlush = async () => {
+    console.log('=== Flush button clicked ===');
     if (cuoralRef.current) {
       console.log('Flushing all intelligence events...');
       await cuoralRef.current.flush();
       console.log('Flush complete!');
+    } else {
+      console.log('ERROR: cuoralRef.current is null!');
     }
   };
 
   // Log session ID
   const handleGetSessionId = () => {
+    console.log('=== Get Session ID button clicked ===');
     if (cuoralRef.current) {
       const sessionId = cuoralRef.current.getSessionId();
       console.log('Current Session ID:', sessionId);
