@@ -1,69 +1,72 @@
-# Cuoral React Native Expo SDK v1.0.0
+# Cuoral React Native Expo SDK v1.2.0
 
-**Hybrid WebView-based customer support chat SDK** for React Native Expo applications.
+**Customer support chat SDK** for React Native Expo managed workflow applications.
 
-## 🎯 Hybrid Implementation
+## 🎯 Overview
 
-This SDK uses a **hybrid approach** that automatically adapts to your environment:
+This SDK is designed specifically for **Expo managed workflow** and uses `expo-web-browser` to display the Cuoral chat widget in an in-app browser.
 
-| Environment | Display Method | User Experience |
-|-------------|----------------|-----------------|
-| **Development Build** | `react-native-webview` | ✅ Fully embedded, no browser UI, seamless |
-| **Expo Go** | `expo-web-browser` | ⚠️ In-app browser with toolbar (visible URL bar) |
-| **Production** | `react-native-webview` | ✅ Fully embedded, no browser UI, seamless |
+### Key Features
 
-### What This Means
+- ✅ **Expo Go Compatible** - Test instantly without building
+- ✅ **Session Management** - Automatic session persistence and restoration
+- ✅ **Customer Intelligence** - Auto-tracking of page views, custom events, and errors
+- ✅ **Secure Storage** - Uses `expo-secure-store` for session data
+- ✅ **Auto-flush Events** - Custom events automatically send after 2 seconds
+- ✅ **Customizable UI** - Configure button color, position, size, and icon
+- ✅ **iOS & Android** - Full support for both platforms
 
-**In Expo Go (Testing)**:
-- Opens in an in-app browser (SFSafariViewController/Chrome Custom Tabs)
-- Shows URL bar and "Done" button (required by iOS/Android)
-- Good for quick testing without building
+### Browser Experience
 
-**In Development/Production Builds**:
-- Fully embedded WebView with no browser chrome
-- Professional, seamless experience
-- Same as your Ionic implementation
+The SDK opens the Cuoral widget in an in-app browser:
+
+**iOS**: SFSafariViewController with customizable toolbar color  
+**Android**: Chrome Custom Tabs with hidden URL bar (when possible)
+
+> **Note**: iOS always shows the URL bar and share button due to Apple's security requirements for SFSafariViewController.
 
 ## 📦 Installation
 
 ```bash
-npm install cuoral-react-native-expo expo-web-browser react-native-webview @react-native-async-storage/async-storage
+npm install cuoral-react-native-expo expo-web-browser expo-secure-store react-native-svg
 ```
 
 or
 
 ```bash
-yarn add cuoral-react-native-expo expo-web-browser react-native-webview @react-native-async-storage/async-storage
+yarn add cuoral-react-native-expo expo-web-browser expo-secure-store react-native-svg
 ```
+
+### Using Expo CLI (Recommended)
+
+```bash
+npx expo install cuoral-react-native-expo expo-web-browser expo-secure-store react-native-svg
+```
+
+### ⚠️ Important: Babel Configuration
+
+You **must** remove the `@babel/plugin-transform-private-methods` plugin with `loose: true` from your `babel.config.js` if present, as it causes networking errors in Expo SDK 54.
+
+**Remove this from `babel.config.js`:**
+```javascript
+// ❌ Remove this
+plugins: [
+  ['@babel/plugin-transform-private-methods', { loose: true }],
+],
+```
+
+If you encounter "Cannot assign to read-only property 'NONE'" errors, this is the cause.
 
 ## 🚀 Quick Start
 
-### Testing in Expo Go
-
 ```bash
 # Install dependencies
-npx expo install cuoral-react-native-expo expo-web-browser @react-native-async-storage/async-storage
+npx expo install cuoral-react-native-expo expo-web-browser expo-secure-store react-native-svg
 
 # Start Expo
 npx expo start
 
-# Scan QR code with Expo Go
-# ⚠️ Will use in-app browser (shows URL bar)
-```
-
-### Production Build
-
-```bash
-# Install ALL dependencies including react-native-webview
-npx expo install cuoral-react-native-expo expo-web-browser react-native-webview @react-native-async-storage/async-storage
-
-# Create development build
-npx expo prebuild
-npx expo run:ios
-# or
-npx expo run:android
-
-# ✅ Will use embedded WebView (no browser UI)
+# Scan QR code with Expo Go or run on simulator
 ```
 
 ## 💻 Usage
@@ -93,7 +96,6 @@ export default function App() {
         email="user@example.com"
         firstName="John"
         lastName="Doe"
-        debug={true}  // See which mode is being used
       />
     </SafeAreaView>
   );
@@ -113,9 +115,9 @@ export default function App() {
 | `buttonColor` | `string` | `'#007AFF'` | Floating button background color |
 | `buttonPosition` | `string` | `'bottomRight'` | `'bottomRight'`, `'bottomLeft'`, `'topRight'`, `'topLeft'` |
 | `buttonSize` | `number` | `60` | Button diameter in pixels |
-| `buttonIcon` | `string` | `'💬'` | Button icon (emoji or text) |
+| `buttonIcon` | `string \| null` | `null` | Custom button icon (emoji or text). `null` uses default SVG message icon |
 | `showFloatingButton` | `boolean` | `true` | Show/hide floating button |
-| `debug` | `boolean` | `false` | Enable debug logging (shows display mode) |
+| `debug` | `boolean` | `false` | Enable debug logging (only logs when explicitly set to `true`) |
 | `widgetBaseUrl` | `string` | `'https://js.cuoral.com/mobile.html'` | Custom widget URL |
 ### Ref Methods
 
@@ -126,36 +128,19 @@ Use a ref to access tracking and control methods:
 | `trackPageView(screen, metadata?)` | `screen: string`, `metadata?: object` | Track screen/page views |
 | `trackError(message, stackTrace?, metadata?)` | `message: string`, `stackTrace?: string`, `metadata?: object` | Track errors manually |
 | `trackCustomEvent(name, category, properties?)` | `name: string`, `category: string`, `properties?: object` | Track custom business events |
-| `open()` | - | Open modal/browser programmatically |
-| `close()` | - | Close modal (WebView mode only) |
+| `open()` | - | Open widget browser programmatically |
+| `close()` | - | Close widget browser |
 | `getSessionId()` | - | Get current session ID |
-## 🔍 How to Check Which Mode Is Active
+| `flush()` | - | Manually flush all intelligence event queues |
+| `clearSession()` | - | End session and clear all data (call before user logout) |
 
-Enable debug mode to see which display method is being used:
+## 📊 Customer Intelligence Tracking
 
-```jsx
-<CuoralLauncher
-  publicKey="YOUR_KEY"
-  debug={true}  // Check console logs
-/>
-```
+Track user behavior and custom business events with the built-in intelligence API. All events are automatically batched and flushed:
 
-Console output:
-```
-[CuoralLauncher] Display mode: webview
-[CuoralLauncher] Mode explanation: Using react-native-webview (embedded)
-```
-
-or
-
-```
-[CuoralLauncher] Display mode: browser
-[CuoralLauncher] Mode explanation: Using expo-web-browser (in-app browser with toolbar)
-```
-
-## 📊 Custom Event Tracking
-
-Track user behavior and custom business events with the built-in intelligence API.
+- **Page Views**: Flush immediately on each track
+- **Custom Events**: Auto-flush after 2 seconds or when 10 events are queued
+- **Errors**: Flush immediately on each track
 
 ### Track Page/Screen Views
 
@@ -242,70 +227,102 @@ cuoralRef.current?.trackCustomEvent(
 | `preferences` | Settings changes |
 | `media` | Video/audio playback |
 
-### Using Without Component (Direct API)
+## 🔄 Session Management
 
-You can also use the intelligence API directly without the component:
+The SDK automatically manages user sessions with persistent storage using `expo-secure-store`:
+
+- **Auto-restoration**: Sessions persist across app restarts
+- **Backend validation**: Sessions are validated with your Cuoral backend
+- **Secure storage**: Session data stored securely on device
+- **Profile sync**: User email/name automatically synced when provided
+
+### Clear Session on Logout
+
+Always clear the session when users log out:
 
 ```jsx
-import { CuoralIntelligence } from 'cuoral-react-native-expo';
-
-// Track events anywhere in your app
-CuoralIntelligence.trackCustomEvent('button_clicked', 'user_action', {
-  button_name: 'signup',
-  screen: 'home',
-});
-
-CuoralIntelligence.trackPageView('/profile', {
-  user_id: '12345',
-});
-
-CuoralIntelligence.trackError('API request failed', error.stack, {
-  endpoint: '/api/users',
-});
+const handleLogout = async () => {
+  // Clear Cuoral session
+  await cuoralRef.current?.clearSession();
+  
+  // Your logout logic
+  await logoutUser();
+};
 ```
 
-**Note:** The direct API requires that a session has been initialized by the CuoralLauncher component first.
+## 🌐 Platform Differences
 
-##  Platform Differences
-
-### iOS (Expo Go)
-- Uses SFSafariViewController
-- Shows URL at top with "Done" button
-- Toolbar can be customized with your brand color
-
-### Android (Expo Go)
-- Uses Chrome Custom Tabs
-- Shows toolbar with close (X) button
+### iOS
+- Uses **SFSafariViewController**
+- Always shows URL bar and "Done" button (Apple requirement)
+- Toolbar color matches your `buttonColor` prop
 - Slides up from bottom
 
-### iOS/Android (Development Build)
-- Embedded WebView in full-screen modal
-- No browser chrome
-- Identical experience on both platforms
+### Android
+- Uses **Chrome Custom Tabs**
+- Hides URL bar when possible (`enableUrlBarHiding: true`)
+- Customized toolbar color
+- Slides up from bottom
 
 ## 🐛 Troubleshooting
 
-### "Still seeing browser UI in my build"
+### "Cannot assign to read-only property 'NONE'" error
 
-Make sure `react-native-webview` is installed:
-```bash
-npm install react-native-webview
-npx expo prebuild
-npx expo run:ios
+This is caused by Babel's `@babel/plugin-transform-private-methods` with `loose: true`. Remove it from your `babel.config.js`:
+
+```javascript
+// ❌ Remove this
+plugins: [
+  ['@babel/plugin-transform-private-methods', { loose: true }],
+],
 ```
 
-### "Checking which mode is active"
+Then clear caches:
+```bash
+rm -rf node_modules/.cache .expo
+npx expo start --clear
+```
 
-Enable debug mode and check console logs.
+### Session not persisting
 
-## 🎯 Recommendations
+Make sure `expo-secure-store` is installed:
+```bash
+npx expo install expo-secure-store
+```
 
-### For Testing
-- Use Expo Go with `expo-web-browser` - quick and easy
+**Note**: `expo-secure-store` only works on iOS/Android, not on web.
+
+### Custom events not appearing in dashboard
+
+Custom events auto-flush after 2 seconds. Wait a moment after triggering events, or manually flush:
+
+```jsx
+cuoralRef.current?.flush();
+```
+
+### Widget not opening
+
+Check that your `publicKey` is correct and the widget URL is accessible. Enable `debug={true}` to see detailed logs.
+
+## ✅ Requirements
+
+- **Expo SDK**: 54.0.0 or higher
+- **React Native**: 0.81.5 or higher  
+- **Node.js**: 20.19.4 or higher (for Metro bundler)
+- **Platform**: iOS and Android (not web)
+
+## 🎯 Best Practices
+
+### For Development
+- Use `debug={true}` during development to see session and tracking logs
+- Test in Expo Go for quick iterations
+- Monitor console for intelligence tracking confirmations
 
 ### For Production
-- Always use development builds with `react-native-webview`
-- Professional, seamless user experience
+- Set `debug={false}` (default) to disable logging
+- Customize `buttonColor` to match your brand
+- Always call `clearSession()` on user logout
+- Let events auto-flush - no need to manually call `flush()`
 
 ## 📄 License
 
