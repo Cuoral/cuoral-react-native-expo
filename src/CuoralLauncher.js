@@ -451,7 +451,9 @@ const CuoralLauncher = forwardRef(({
    * Log debug messages
    */
   const log = (...args) => {
-    // Debug logging removed
+    if (debug) {
+      console.log('[Cuoral]', ...args);
+    }
   };
 
   if (!publicKey) {
